@@ -20,8 +20,6 @@ public class UserController {
 
   @PostMapping("/signup")
   @Operation(summary = "회원가입", description = "회원가입을 수행합니다.")
-  @ApiResponse(responseCode = "200", description = "회원가입 성공")
-  @ApiResponse(responseCode = "400", description = "회원가입 실패")
   public ResponseEntity<UserResponseDto> signup(@RequestBody UserRequestDto userRequestDto) {
     UserResponseDto userResponseDto = userService.signup(userRequestDto);
     return ResponseEntity.ok(userResponseDto);

@@ -20,8 +20,6 @@ public class AuthController {
 
   @PostMapping("/sign")
   @Operation(summary = "로그인", description = "로그인을 수행합니다.")
-  @ApiResponse(responseCode = "200", description = "로그인 성공")
-  @ApiResponse(responseCode = "400", description = "로그인 실패")
   public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
     LoginResponseDto token = authService.login(loginRequestDto);
     return ResponseEntity.ok(token);
@@ -29,8 +27,6 @@ public class AuthController {
 
   @PostMapping("/re-issue")
   @Operation(summary = "토큰 재발급", description = "리프레시 토큰을 이용하여 액세스 토큰을 재발급합니다.")
-  @ApiResponse(responseCode = "200", description = "재발급 성공")
-  @ApiResponse(responseCode = "400", description = "재발급 실패")
   public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
     return authService.reissue(request, response);
 
