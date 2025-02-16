@@ -1,5 +1,6 @@
 package com.sparta.preonboarding.infra.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -26,15 +27,18 @@ public class JwtUtil {
     this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
   }
 
+  public Claims parserBuilder(String token) {
+    return Jwts.parserBuilder()
+        .setSigningKey(secretKey)
+        .build()
+        .parseClaimsJws(token)
+        .getBody();
+  }
+
 
   public String getUsername(String token) {
     try {
-      return Jwts.parserBuilder()
-          .setSigningKey(secretKey)
-          .build()
-          .parseClaimsJws(token)
-          .getBody()
-          .get("username", String.class);
+      return parserBuilder(token).get("username", String.class);
     } catch (Exception e) {
       throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
     }
@@ -43,12 +47,7 @@ public class JwtUtil {
 
   public String getRole(String token) {
     try {
-      return Jwts.parserBuilder()
-          .setSigningKey(secretKey)
-          .build()
-          .parseClaimsJws(token)
-          .getBody()
-          .get("role", String.class);
+      return parserBuilder(token).get("role", String.class);
     } catch (Exception e) {
       throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
     }
@@ -56,12 +55,7 @@ public class JwtUtil {
 
   public String getCategory(String token) {
     try{
-      return Jwts.parserBuilder()
-          .setSigningKey(secretKey)
-          .build()
-          .parseClaimsJws(token)
-          .getBody()
-          .get("category", String.class);
+      return parserBuilder(token).get("category", String.class);
     } catch (Exception e) {
       throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
     }
