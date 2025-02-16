@@ -8,6 +8,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -15,18 +16,14 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+  @Transactional
   public UserResponseDto signup(UserRequestDto userRequestDto) {
     String username = userRequestDto.getUsername();
     String nickname = userRequestDto.getNickname();
     String password = userRequestDto.getPassword();
 
-    if(userRepository.existsByUsername(username)) {
-      throw new IllegalArgumentException("이미 존재하는 username입니다.");
-    }
-
-    if(userRepository.existsByNickname(nickname)) {
-      throw new IllegalArgumentException("이미 존재하는 nickname입니다.");
-    }
+    validateDuplicateUser(username, nickname);
 
     User user = User.builder()
         .username(username)
@@ -48,6 +45,16 @@ public class UserService {
         .nickname(user.getNickname())
         .authorities(authorities)
         .build();
+  }
+
+  private void validateDuplicateUser(String username, String nickname) {
+    if(userRepository.existsByUsername(username)) {
+      throw new IllegalArgumentException("이미 존재하는 사용자입니다.");
+    }
+
+    if(userRepository.existsByNickname(nickname)) {
+      throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+    }
   }
 
 }
