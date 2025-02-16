@@ -3,6 +3,7 @@ package com.sparta.preonboarding.infra.security;
 import io.jsonwebtoken.Jwts;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import lombok.extern.slf4j.Slf4j;
@@ -27,30 +28,43 @@ public class JwtUtil {
 
 
   public String getUsername(String token) {
-    return Jwts.parserBuilder()
-        .setSigningKey(secretKey)
-        .build()
-        .parseClaimsJws(token)
-        .getBody()
-        .get("username", String.class);
+    try {
+      return Jwts.parserBuilder()
+          .setSigningKey(secretKey)
+          .build()
+          .parseClaimsJws(token)
+          .getBody()
+          .get("username", String.class);
+    } catch (Exception e) {
+      throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
+    }
+
   }
 
   public String getRole(String token) {
-    return Jwts.parserBuilder()
-        .setSigningKey(secretKey)
-        .build()
-        .parseClaimsJws(token)
-        .getBody()
-        .get("role", String.class);
+    try {
+      return Jwts.parserBuilder()
+          .setSigningKey(secretKey)
+          .build()
+          .parseClaimsJws(token)
+          .getBody()
+          .get("role", String.class);
+    } catch (Exception e) {
+      throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
+    }
   }
 
   public String getCategory(String token) {
-    return Jwts.parserBuilder()
-        .setSigningKey(secretKey)
-        .build()
-        .parseClaimsJws(token)
-        .getBody()
-        .get("category", String.class);
+    try{
+      return Jwts.parserBuilder()
+          .setSigningKey(secretKey)
+          .build()
+          .parseClaimsJws(token)
+          .getBody()
+          .get("category", String.class);
+    } catch (Exception e) {
+      throw new IllegalArgumentException("토큰이 유효하지 않습니다.");
+    }
   }
 
   public Boolean isExpired(String token) {
@@ -65,6 +79,9 @@ public class JwtUtil {
 
   public String createJwt(String category, String username, String role, Long expireTime) {
     return Jwts.builder()
+        .setId(UUID.randomUUID().toString())
+        .setIssuer("preonboarding")
+        .setSubject(username)
         .claim("category", category)
         .claim("username", username)
         .claim("role", role)

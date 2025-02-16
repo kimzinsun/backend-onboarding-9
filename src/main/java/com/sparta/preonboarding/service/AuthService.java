@@ -27,6 +27,9 @@ public class AuthService {
   public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
     String refresh = null;
     Cookie[] cookies = request.getCookies();
+    if(cookies==null || cookies.length==0){
+      return ResponseEntity.badRequest().build();
+    }
 
     for (Cookie cookie : cookies) {
       if (cookie.getName().equals("refresh")) {
