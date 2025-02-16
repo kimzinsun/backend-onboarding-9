@@ -1,5 +1,7 @@
 package com.sparta.preonboarding.infra.config;
 
+import com.sparta.preonboarding.infra.security.JwtFilter;
+import com.sparta.preonboarding.infra.security.JwtUtil;
 import com.sparta.preonboarding.infra.security.LoginFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+  private final JwtUtil jwtUtil;
   @Bean
   public BCryptPasswordEncoder bCryptPasswordEncoder() {
     return new BCryptPasswordEncoder();
@@ -34,7 +38,8 @@ public class SecurityConfig {
             .requestMatchers("/h2-console/**").permitAll()
             .anyRequest().authenticated()
         )
-        .addFilterAt(new LoginFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
+        .addFilterAt(new LoginFilter(authenticationManager, jwtUtil), UsernamePasswordAuthenticationFilter.class)
         .formLogin(AbstractHttpConfigurer::disable)
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
