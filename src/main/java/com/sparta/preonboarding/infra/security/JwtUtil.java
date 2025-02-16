@@ -14,11 +14,10 @@ import org.springframework.stereotype.Component;
 public class JwtUtil {
 
   public static final String ACCESS_TOKEN_HEADER = "Authorization";
-  public static final String REFRESH_TOKEN_HEADER = "Refresh-Token";
   public static final String BEARER_PREFIX = "Bearer ";
 
-  private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000L;
-  private static final long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;
+  public static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 1000L;
+  public static final long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;
 
   private SecretKey secretKey;
 
@@ -45,6 +44,15 @@ public class JwtUtil {
         .get("role", String.class);
   }
 
+  public String getCategory(String token) {
+    return Jwts.parserBuilder()
+        .setSigningKey(secretKey)
+        .build()
+        .parseClaimsJws(token)
+        .getBody()
+        .get("category", String.class);
+  }
+
   public Boolean isExpired(String token) {
     return Jwts.parserBuilder()
         .setSigningKey(secretKey)
@@ -55,8 +63,9 @@ public class JwtUtil {
         .before(new Date());
   }
 
-  public String createJwt(String username, String role, Long expireTime) {
+  public String createJwt(String category, String username, String role, Long expireTime) {
     return Jwts.builder()
+        .claim("category", category)
         .claim("username", username)
         .claim("role", role)
         .setIssuedAt(new Date(System.currentTimeMillis()))

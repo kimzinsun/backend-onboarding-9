@@ -1,11 +1,9 @@
 package com.sparta.preonboarding.infra.security;
 
-import com.sparta.preonboarding.dto.CustomUserDetails;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Collection;
-import java.util.Iterator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,26 +32,42 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   }
 
   @Override
-  protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
-    CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-    String username = customUserDetails.getUsername();
+  protected void successfulAuthentication(HttpServletRequest request,
+      HttpServletResponse response,
+      FilterChain chain,
+      Authentication authentication) {
+      String username = authentication.getName();
+      String role = extractRole(authentication);
 
-    Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-    Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-    GrantedAuthority auth = iterator.next();
+      String accessToken = jwtUtil.createJwt("access", username, role, JwtUtil.ACCESS_TOKEN_EXPIRE_TIME);
+      String refreshToken = jwtUtil.createJwt("refresh", username, role, JwtUtil.REFRESH_TOKEN_EXPIRE_TIME);
 
-    String role = auth.getAuthority();
+      response.setHeader(JwtUtil.ACCESS_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + accessToken);
+      response.addCookie(createCookie(refreshToken));
+      response.setStatus(HttpServletResponse.SC_OK);
 
-    String token = jwtUtil.createJwt(username, role, 1000 * 60 * 60 * 24L);
+  }
 
-    response.setHeader(JwtUtil.ACCESS_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + token);
-
+  private String extractRole(Authentication authentication) {
+    return authentication.getAuthorities().stream()
+        .findFirst()
+        .map(GrantedAuthority::getAuthority)
+        .orElse("ROLE_USER");
   }
 
   @Override
   protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
     log.info("##### unsuccessfulAuthentication");
 
+  }
+
+  private Cookie createCookie(String value) {
+    Cookie cookie = new Cookie("refresh", value);
+    cookie.setHttpOnly(true);
+    cookie.setMaxAge((int) JwtUtil.REFRESH_TOKEN_EXPIRE_TIME / 1000);
+    cookie.setSecure(true);
+    cookie.setPath("/");
+    return cookie;
   }
 
 }
