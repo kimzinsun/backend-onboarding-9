@@ -3,6 +3,8 @@ package com.sparta.preonboarding.service;
 import com.sparta.preonboarding.domain.model.User;
 import com.sparta.preonboarding.domain.repository.UserRepository;
 import com.sparta.preonboarding.dto.UserRequestDto;
+import com.sparta.preonboarding.dto.UserResponseDto;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,7 +15,7 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
-  public void signup(UserRequestDto userRequestDto) {
+  public UserResponseDto signup(UserRequestDto userRequestDto) {
     String username = userRequestDto.getUsername();
     String nickname = userRequestDto.getNickname();
     String password = userRequestDto.getPassword();
@@ -34,6 +36,18 @@ public class UserService {
         .build();
 
     userRepository.save(user);
+
+    List<UserResponseDto.AuthorityDto> authorities = List.of(
+        UserResponseDto.AuthorityDto.builder()
+            .authorityName("ROLE_USER")
+            .build()
+    );
+
+    return UserResponseDto.builder()
+        .username(user.getUsername())
+        .nickname(user.getNickname())
+        .authorities(authorities)
+        .build();
   }
 
 }

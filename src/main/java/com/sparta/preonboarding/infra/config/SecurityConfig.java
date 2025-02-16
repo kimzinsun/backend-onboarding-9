@@ -34,13 +34,13 @@ public class SecurityConfig {
         .csrf(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/login", "/", "/signup").permitAll()
+            .requestMatchers("/sign", "/", "/signup").permitAll()
             .requestMatchers("/re-issue").permitAll()
             .requestMatchers("/h2-console/**").permitAll()
             .anyRequest().authenticated()
         )
         .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
-        .addFilterAt(new LoginFilter(authenticationManager, jwtUtil), UsernamePasswordAuthenticationFilter.class)
+//        .addFilterAt(new LoginFilter(authenticationManager, jwtUtil), UsernamePasswordAuthenticationFilter.class)
         .formLogin(AbstractHttpConfigurer::disable)
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

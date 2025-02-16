@@ -1,6 +1,7 @@
 package com.sparta.preonboarding.controller;
 
 import com.sparta.preonboarding.dto.LoginRequestDto;
+import com.sparta.preonboarding.dto.LoginResponseDto;
 import com.sparta.preonboarding.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,9 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
   private final AuthService authService;
 
-  @PostMapping("/login")
-  public String login(@RequestBody LoginRequestDto loginRequestDto) {
-    return "login";
+  @PostMapping("/sign")
+  public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
+    LoginResponseDto token = authService.login(loginRequestDto);
+    return ResponseEntity.ok(token);
   }
 
   @PostMapping("/re-issue")
